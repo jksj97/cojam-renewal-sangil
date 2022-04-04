@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #fce300;
+      }
+
+      .cls-2, .cls-3 {
+        fill: none;
+      }
+
+      .cls-3 {
+        stroke: #151515;
+        stroke-width: 2px;
+      }
+    </style>
+  </defs>
+  <g id="right-btn" transform="translate(-1517 -11242)">
+    <rect id="사각형_535" data-name="사각형 535" class="cls-1" width="64" height="64" rx="32" transform="translate(1517 11242)"/>
+    <rect id="사각형_536" data-name="사각형 536" class="cls-2" width="32" height="32" transform="translate(1533 11258)"/>
+    <path id="right-arrow" class="cls-3" d="M-7341-1705.9l10,9-10,9" transform="translate(8885.5 12971.4)"/>
+  </g>
+</svg>
