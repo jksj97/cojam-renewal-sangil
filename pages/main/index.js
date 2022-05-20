@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react'; 
 import { useHistory } from 'react-router-dom'
 
-import HotList from "./list";
+import HotList from "./hotlist";
+import MultiList from "./multilist";
 
 import mainVisualScroll from '@assets/main_visual_scroll02.png'
 import mainServiceIcon01 from '@assets/main_service_icon01.svg'
@@ -59,6 +60,7 @@ function Index() {
 			document.querySelector('.main-service > div').style.background = `url('${phoneBackground}') -280px no-repeat`;
 		}
 	}
+
 
 	useEffect(() => {
 		window.addEventListener('resize', resizeFunc);
@@ -156,6 +158,14 @@ function Index() {
 		next.classList.remove('next');
 		next.classList.add('current');
 	}
+
+	//$('#selectBox').change(function() {
+		//var selectedClass = $('#selectBox').val();
+		//$('#showoption').
+		//removeClass('ArtCulture Competition Community CrowdSolving Economy Science').
+		//addClass(selectedClass);
+	  //});
+
 	
 	
 
@@ -193,7 +203,7 @@ function Index() {
         					<ul>
             					<li class="current"><a href="#">1000CT</a></li>
             					<li class="next"><a href="#">1234CT</a></li>
-            					<li><a href="#">25679CT</a></li>
+            					<li><a href="#">2567CT</a></li>
             					<li><a href="#">367CT</a></li>
             					<li class="prev"><a href="#">3789CT</a></li>
         					</ul>
@@ -235,8 +245,6 @@ function Index() {
 
 					<div className="hotlist-items">
 						<HotList></HotList>
-						<HotList></HotList>
-						<HotList></HotList>
 					</div>
 				</div>
 			</div>
@@ -245,23 +253,7 @@ function Index() {
 			{/*다중 퀘스트 */}
 			<div className="multiquest-area">
 				<div className="multiquest-container">
-				    <div className="multiquest-tlt">
-						<select name="membership" id="membership">
-  							<option className="h-quest-item" value="Art-Culture" selected>Art & Culture</option>
-  							<option className="h-quest-item" value="Competition">Competition</option>
-  							<option className="h-quest-item" value="Community">Community</option>
-  							<option className="h-quest-item" value="Crowd-Solving">Crowd Solving</option>
-							<option className="h-quest-item" value="Economy">Economy</option>
-							<option className="h-quest-item" value="Science">Science</option>
-						</select>
-						<a href="/QuestList" className="multiquestLink">View All Quest</a>
-					</div> {/* hotquest-tlt 끝*/}
-
-					<div className="multi-list-items">
-						<HotList></HotList>
-						<HotList></HotList>
-						<HotList></HotList>
-					</div>
+					<MultiList></MultiList>
 				</div>
 			</div>
 
@@ -352,6 +344,8 @@ function addComma(data) {
 
 	return data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
+
+
 
 
 

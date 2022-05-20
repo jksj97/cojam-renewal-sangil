@@ -7,7 +7,7 @@ function Index() {
   return (
 	<div className="bg-service" style={{background: `url('${backgroundImage}') center -590px no-repeat, #fff`}}>
 			
-    </div>
+  </div>
   );
 }
 

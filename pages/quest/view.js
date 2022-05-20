@@ -5,7 +5,6 @@ import { Modal } from 'react-responsive-modal';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Moment from 'moment';
-import createNewQuest from './createNewQuest';
 import { useLoadingState } from "../../assets/context/LoadingContext";
 
 import { VictoryChart, VictoryLine, VictoryLegend } from 'victory';
@@ -13,9 +12,6 @@ import { VictoryChart, VictoryLine, VictoryLegend } from 'victory';
 import 'swiper/css';
 import 'react-responsive-modal/styles.css';
 
-import doBetting from './doBetting';
-import { urlFor, client } from "../../sanity";
-import { useWalletData } from '@data/wallet';
 
 import { kaikasGetBalance } from '@api/UseKaikas';
 
@@ -199,369 +195,49 @@ function Index(props) {
 
 
   	return (
-		<div className="bg-quest" style={{background: `url('${backgroundImage}') center -150px no-repeat`}}>
-
-			{/* 기본영역 (타이틀/네비/버튼) */}
-			<dl className="title-section">
-				<dt>
-					<h2>{quest && quest.category}</h2>
-					<h3><i className="uil uil-estate"></i> Home · <span>{quest && quest.category}</span></h3>
-				</dt>
-				
-			</dl>
-			{/* 기본영역 끝 */}
-
-			<div className="container">
-				{/* 상세 */}
-				<div className="quest-view">
-					{
-						quest && quest.snsUrl && 
-						<div>
-							<h2><span>Confirmed</span> BTS reached #1 on the Billboard Chart with a song "Dynamite". Will BTS be able to win "The album of the year" at the Grammy Awards held on January 31, 2021?</h2>
-							<p><iframe title="movie" width="100%" height="650" src={quest.snsUrl} frameBorder="0" allow="accelerometer; autoPlay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe></p>
-						</div>
-					}
-					<dl>
-						<dt>
-							<h2><span>{quest?.dDay}</span> {quest?.endDateTime}</h2>
-							<p style={{ backgroundImage: `url('${quest && urlFor(quest.imageFile)}')`, backgroundPosition: `center`, backgroundSize: `cover` }}></p>
-							
-							<h3>Odds <span>{rate}</span> X</h3>
-							<h3>Win <span>{receiveToken}</span> CT if right</h3>
-							<ul>
-								{
-									quest?.answers && quest.answers.map((answer, index) => (
-										<li key={index} onClick={() => setSelectedAnswer(answer)} style={{cursor:'pointer'}} className={`${selectedAnswer == answer && 'active'}`}>
-											<div>{answer}</div>
-											<p>{answerAllocations[answer]}X</p>
-											<h2><div style={{width:`${answerPercents[answer]}%`}}></div></h2>
-										</li>
-									))
-								}
-							</ul>
-							<div>
-								<form name="searchForm" method="post" action="">
-									<fieldset>
-										<legend>CT</legend>
-										<p><input type="text" name="string" title="CT" defaultValue="" placeholder="CT Input" onChange={(e) => setBettingCoin(e.target.value)} /></p>
-										<div>
-											<div style={{cursor: 'pointer'}} onClick={() => setBetting()}>My Choice : {selectedAnswer}</div>
-										</div>
-									</fieldset>
-								</form>
-							</div>
-						</dt>
-						<dd>
-							<ul>
-								<li key='chat' className="qv-tab-chart active" onClick={() => tabOpen('chart')}><i className="uil uil-chart-line"></i> <span>Chat</span></li>
-								<li key='vol' className="qv-tab-vol" onClick={() => tabOpen('vol')}><i className="uil uil-files-landscapes-alt"></i> <span>Vol</span></li>
-								<li key='info' className="qv-tab-info" onClick={() => tabOpen('info')}><i className="uil uil-file-info-alt"></i> <span>Info</span></li>
-							</ul>
-							<div className="qv-chart">
-								<h2>Probability Chart</h2>
-								{/*<p><img src={chartTest} alt="" title="" /></p>*/}
-								<p> 
-								<VictoryChart>
-									{
-										Object.keys(historyGraph).map((graphKey) => (
-											<VictoryLine
-												style={{
-													data: { stroke: `${answerColors[graphKey]}` }
-												}}
-												data={historyGraph[graphKey]}
-											/>
-										))
-									}
-									<VictoryLegend x={125} y={0}
-										centerTitle
-										orientation="horizontal"
-										gutter={20}
-										style={{ border: { stroke: "black" }, title: {fontSize: 20 } }}
-										data={
-											Object.keys(answerColors).map((colorKey) => (
-												{ name: `${colorKey}`, symbol: { fill: `${answerColors[colorKey]}` } }
-											))
-										}
-									/>
-								</VictoryChart>
-								</p>
-							</div>
-							<div className="qv-vol">
-								<h2>Total {questTotalAmount} CT</h2>
-								<ul>
-									{
-										answerHistory?.map((answerHist, index) => (
-											<li key={index}>
-												<div><i className="uil uil-circle"></i><span style={{color:`${answerHist.answerColor.color.value}`}}>{answerHist.answerTitle}</span></div>
-												<div><span>{addComma(answerHist.bettingCoin)}</span> CT</div>
-												<div>{Moment(answerHist.createdDateTime).format('YYYY-MM-DD')}</div>
-											</li>
-	  									))
-									}
-								</ul>
-							</div>
-							<div className="qv-info">
-								<h2>Detail Information</h2>
-								<ul>
-									<li>
-										<h2><i className="uil uil-angle-right"></i>Category</h2>
-										<div>{quest?.categoryNm.seasonCategoryName}</div>
-									</li>
-									<li>
-										<h2><i className="uil uil-angle-right"></i>Creator Fee</h2>
-										<div>{quest?.creatorFee}</div>
-									</li>
-									<li>
-										<h2><i className="uil uil-angle-right"></i>Volume</h2>
-										<div>{addComma(quest?.totalAmount)}</div>
-									</li>
-									<li>
-										<h2><i className="uil uil-angle-right"></i>Creator Salary</h2>
-										<div>{addComma(quest?.creatorPay)}</div>
-									</li>
-									<li>
-										<h2><i className="uil uil-angle-right"></i>Start Date</h2>
-										<div>{Moment(quest?.startDateTime).format('YYYY-MM-DD')}</div>
-									</li>
-									<li>
-										<h2><i className="uil uil-angle-right"></i>Transaction</h2>
-										<div>{quest?.approveTx}</div>
-									</li>
-									<li>
-										<h2><i className="uil uil-angle-right"></i>End Date</h2>
-										<div>{Moment(quest?.endDateTime).format('YYYY-MM-DD')}</div>
-									</li>
-								</ul>
-							</div>
-						</dd>
-					</dl>
-				</div>
-				{/* 상세 끝 */}
-
-
-				{/* 등록버튼 */}
-				<div className="add-btn">
-					<Link to="#" onClick={() => modalQuestAdd(true)}><i className="uil uil-plus"></i></Link>
-				</div>
-				{/* 등록버튼 끝 */}
-
-
-				{/* 모달 - 퀘스트 등록 */}
-				<Modal open={openQuestAdd} onClose={() => modalQuestAdd(false)} center>
-					<div className="modal-quest-add">
-						<form name="addForm" method="post" action="">
-						<fieldset>
-							<legend>등록</legend>
-							<div className="mqa-area">
-							<dl className="mqa-header">
-								<dt>Create New Prediction</dt>
-								<dd onClick={() => modalQuestAdd(false)}>
-								<i className="uil uil-times"></i>
-								</dd>
-							</dl>
-							<ul className="mqa-content2">
-								<li>
-								<select className="w100p" name="languageSelect" onChange={(e) => setModalValues({...modalValues, 'questLanguage': e.target.value})}>
-									<option value="EN">&nbsp;🇺🇸&nbsp;&nbsp;English</option>
-									<option value="KR">&nbsp;🇰🇷&nbsp;&nbsp;Korean</option>
-									<option value="CH">&nbsp;🇨🇳&nbsp;&nbsp;Chinese</option>
-								</select>
-								</li>
-								<li>
-								<textarea
-									name="title"
-									type="text"
-									className="w100p"
-									placeholder="Please enter a title(English)"
-									onChange={(e) => setModalValues({...modalValues, 'title': e.target.value})}
-								></textarea>
-								</li>
-								<li>
-								<select name="name" title="" className="w100p" defaultValue="" onChange={(e) => setModalValues({...modalValues, 'seasonCategory': { _type: 'reference', _ref: e.target.value }})}>
-									<option value="">
-									Please select a category
-									</option>
-									{
-									categories && categories.filter((category) => category.seasonCategoryName !== 'All').map((category, index) => (
-										<option key={index} value={category._id}>{category.seasonCategoryName}</option>
-									))
-									}
-								</select>
-								</li>
-								<li>
-								<DatePicker
-									dateFormat="yyyy-MM-dd HH:mm:ss"
-									selected={endDateTime}
-									onChange={(date) => setEndDateTime(date)}
-									showTimeInput
-								/>
-								</li>
-								<li>
-								<select name="questType" title="" className="w100p" onChange={(e) => setModalValues({...modalValues, 'questType': e.target.files})} >
-									<option value="I" selected>
-									Image
-									</option>
-									<option value="S">SNS url</option>
-								</select>
-								</li>
-								<li>
-								<div className="input-file">
-									<label>
-										File Attach
-										<input type="file" onChange={(e) => setModalValues({...modalValues, 'imageFile': e.target.files})} />
-									</label>
-									&nbsp;
-									<input
-										type="text"
-										readOnly="readOnly"
-										title="File Route"
-										id="fileRoute"
-										placeholder="Attach an image"
-										onChange={(e) => setModalValues({...modalValues, 'fileKey': e.target.value})}
-									/>
-								</div>
-								</li>
-								<li>
-									<input
-										name="name"
-										type="text"
-										className="w100p"
-										placeholder="Enter the image link"
-										onChange={(e) => setModalValues({...modalValues, 'snsUrl': e.target.value})}
-									/>
-								</li>
-							</ul>
-							<ol className="mqa-content1">
-								<li>Select a Type</li>
-								<li>
-									<Link>
-										<i className="uil uil-plus-circle" onClick={() => { if(document.querySelectorAll('.mqa-answers li').length > 5) {return;} document.querySelector('.mqa-answers').insertAdjacentHTML('beforeend', `<li> <input name="name" type="text" className="w100p" placeholder="" /> </li>`)}}></i>
-									</Link>
-									<Link>
-										<i className="uil uil-minus-circle"onClick={() => { if(document.querySelectorAll('.mqa-answers li').length < 2) {return;} document.querySelector('.mqa-answers').removeChild(document.querySelector('.mqa-answers').lastChild)}}></i>
-									</Link>
-								</li>
-							</ol>
-							<ul className="mqa-content2 mqa-answers">
-								<li>
-								<input
-									name="name"
-									type="text"
-									className="w100p"
-									placeholder=""
-								/>
-								</li>
-								<li>
-								<input
-									name="name"
-									type="text"
-									className="w100p"
-									placeholder=""
-								/>
-								</li>
-							</ul>
-							<p className="mqa-btn">
-								<Link to='#' onClick={() => createNewQuest(modalValues, document.querySelectorAll('.mqa-answers li input'))}>Complete</Link>
-							</p>
-							</div>
-						</fieldset>
-						</form>
-					</div>
-				</Modal>
-				{/* 모달 - 퀘스트 등록 끝 */}
-
-
-				{/* 모달 - 퀘스트 시즌 */}
-				<Modal open={openQuestSeason} onClose={() => modalQuestSeason(false)} center>
-					<div className="modal-quest-season">
-						<div className="mqs-area">
-							<dl className="mqs-header">
-								<dt>Create Season of COJAM Service!</dt>
-								<dd onClick={() => modalQuestSeason(false)}><i className="uil uil-times"></i></dd>
-							</dl>
-							<div className="mqs-date"><i className="uil uil-calendar-alt"></i> 2021.01.4 ~ 2021.12.31 (331)</div>
-							<ul className="mqs-content">
-								<li>
-									<h3>ART</h3>
-									<div>
-										<div style={{width:`30%`}}></div>
-										<p>1 / 100</p>
-									</div>
-								</li>
-								<li>
-									<h3>Science</h3>
-									<div>
-										<div style={{width:`10%`}}></div>
-										<p>1 / 100</p>
-									</div>
-								</li>
-								<li>
-									<h3>Crowdsolving</h3>
-									<div>
-										<div style={{width:`60%`}}></div>
-										<p>1 / 100</p>
-									</div>
-								</li>
-								<li>
-									<h3>Competition</h3>
-									<div>
-										<div style={{width:`50%`}}></div>
-										<p>1 / 100</p>
-									</div>
-								</li>
-								<li>
-									<h3>Economy</h3>
-									<div>
-										<div style={{width:`3%`}}></div>
-										<p>1 / 100</p>
-									</div>
-								</li>
-								<li>
-									<h3>Community</h3>
-									<div>
-										<div style={{width:`10%`}}></div>
-										<p>1 / 100</p>
-									</div>
-								</li>
-							</ul>
-							<div className="mqs-info">
-								<h2>Titel : Create Season of COJAM Service!</h2>
-								<h2>Description : Create Season of COJAM Service!</h2>
-								<div>
-									COJAM Fee : <span>8%</span><br />
-									Charity Fee : <span>2%</span><br />
-									Creator Fee : <span>5%</span><br />
-									Creator Pay : <span>0CT</span><br />
-									Minimum Pay : <span>5,000CT</span><br />
-									Maximum Pay : <span>300,000CT</span>
-								</div>
-							</div>
-						</div>
-					</div>
-				</Modal>
-        {/* 모달 - 퀘스트 시즌 끝 */}
-			</div>
-    </div>
+		  
+	<div className="quest">
+      	<div className="top-randomQuest">
+			<div className="random-left">
+          		<figure></figure>
+          		<div className=""></div>
+        	</div>
+			<div className="random-right">
+          		<span>22.01.12 WED Winner Prediction : [EFL CUP] Semi-Final, Chelsea FC vs Tottenham Hotspur FC</span>
+          		<div><h3 style={{fontWeight: 700}}>D-day 2 : 2022 02 18</h3></div>
+          		<div className="randomQuest-results">
+        			<div className="random-results-inner">
+              			<div className="random-resultsTop">
+                			<ul>
+                  				<li>
+                    				<div className="random-itemLeft"></div>
+                    				<div className="random-itemRight"></div>
+                  				</li>
+                  				<li>
+                    				<div className="random-itemLeft"></div>
+                    				<div className="random-itemRight"></div>
+                  				</li>
+                  				<li>
+                    				<div className="random-itemLeft"></div>
+                    				<div className="random-itemRight"></div>
+                  				</li>
+                  				<li>
+                    				<div className="random-itemLeft"></div>
+                    				<div className="random-itemRight"></div>
+                  				</li>
+                			</ul>
+              			</div>
+              			<div className="random-resultsBot">
+                			<button className="resultsTop-btn"><span>Choice Results</span></button>
+                			<div className="init-battingnum"></div>
+              			</div>
+        			</div>
+        		</div>
+        	</div>
+		</div>
+	</div>
   );
 }
 
-function tabOpen(target) {
-	document.querySelector('.qv-chart').style.display = 'none';
-	document.querySelector('.qv-vol').style.display = 'none';
-	document.querySelector('.qv-info').style.display = 'none';
-
-	document.querySelector('.qv-tab-chart').classList.remove("active");
-	document.querySelector('.qv-tab-vol').classList.remove("active");
-	document.querySelector('.qv-tab-info').classList.remove("active");
-
-	document.querySelector(`.qv-${target}`).style.display = 'block';
-	document.querySelector(`.qv-tab-${target}`).classList.add("active");
-}
-
-function addComma(data) {
-	if(!data) return '';
-
-	return data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-}
 
 export default Index;

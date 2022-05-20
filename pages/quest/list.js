@@ -3,6 +3,7 @@ import { Link, useHistory } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Modal } from "react-responsive-modal";
 import Moment from 'moment';
+import $ from "jquery";
 
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -13,7 +14,6 @@ import backgroundImage from '@assets/body_quest.jpg';
 
 import { useLoadingState } from "@assets/context/LoadingContext";
 import Pagination from "react-sanity-pagination";
-import createNewQuest from './createNewQuest';``
 
 import "swiper/css";
 import "react-responsive-modal/styles.css";
@@ -137,317 +137,271 @@ function Index() {
   console.log('seasonInfos', seasonInfos);
 
   return (
-  <div className="bg-quest" style={{background: `url('${backgroundImage}') center -150px no-repeat, #fff`}}>
-      {/* 기본영역 (타이틀/네비/버튼) */}
-      <dl className="title-section">
-        <dt>
-          <h2>{activeCategory}</h2>
-          <h3>
-            <i className="uil uil-estate"></i> Home · Quest ·{" "}
-            <span>{activeCategory}</span>
-          </h3>
-        </dt>
-        <dd>
-          <Link to="#" onClick={() => modalQuestAdd(true)}>
-            <i className="uil uil-plus-circle"></i>{" "}
-            <span>Create New Prediction</span>
-          </Link>
-          <Link to="#" onClick={() => modalQuestSeason(true)}>
-            <i className="uil uil-info-circle"></i> <span>Season Info</span>
-          </Link>
-        </dd>
-      </dl>
-      {/* 기본영역 끝 */}
-
-      <div className="container">
-        {/* 카테고리 영역 */}
-        <div className="category-section">
-          <dl>
-            <dt>
-              <Swiper
-                className="swiper-wrapper"
-                spaceBetween={10}
-                slidesPerView={"auto"}
-              >
-                {
-                  categories && categories.map((category, index) => (
-                    <SwiperSlide key={index} className={"swiper-slide " + (category.seasonCategoryName === activeCategory ? 'active' : '')} onClick={() => setActiveCategory(category.seasonCategoryName)} style={{cursor:'pointer'}}>{category.seasonCategoryName}</SwiperSlide>
-                  ))
-                }
-              </Swiper>
-            </dt>
-            <dd>
-              <Link to="#">
-                <i className="uil uil-history"></i>
-                <span>History</span>
-              </Link>
-            </dd>
-          </dl>
-        </div>
-        {/* 카테고리 영역 끝 */}
-
-        {/* 리스트 시작 */}
-        <div className="quest-list-columns">
-          {/* Quest 리스트 루프 Start*/}
-          <ul className="paginationContent">
-          {
-            items && items.map((quest, index) => {
-              return (
-                <li key={index} onClick={() => { if(quest.dDay === 'expired') {return;} history.push({pathname: `/QuestView`, state: {questId: quest._id}}) }}>
-                  { quest.dDay === 'expired' && <div>CLOSE</div> }
-                  <h2>
-                    Total <span>{quest.totalAmount && addComma(quest.totalAmount)}</span> CT
-                  </h2>
-                  <p>
-                    <span
-                      style={{
-                        backgroundImage: quest.imageFile && `url('${urlFor(quest.imageFile)}')`,
-                        backgroundPosition: `center`,
-                        backgroundSize: `cover`,
-                      }}
-                    ></span>
-                  </p>
-                  <h3>
-                    <span>{quest.dDay}</span> {quest.endDateTime}
-                  </h3>
-                  <h4>{quest.title}</h4>
-                  <ul>
-                    {
-                      quest.answers && quest.answers.map((answer, index) => (              
-                        <li key={index}>
-                          <div>{answer}</div>
-                          <p>{answerAllocations[answer]} X</p>
-                          <h2>
-                            <div style={{ width: `${answerPercents[answer]}%` }}></div>
-                          </h2>
-                        </li>
-                      ))
-                    }
-                  </ul>
-                </li>
-              );
-            })
-          }
-          {/* Quest 리스트 루프 End */}
-          </ul>
-        </div>
-        {/* 리스트 끝 */}
-
-        {/* 페이지네이션 */}
-				<Pagination
-						nextButton={true}
-						prevButton={true}
-						nextButtonLabel={">"}
-						prevButtonLabel={"<"}
-						items={itemsToSend}
-						action={action}
-						postsPerPage={postsPerPage}
-				/>
-				{/* 페이지네이션 끝 */}
-
-
-          {/* 등록버튼 */}
-        <div className="add-btn">
-          <Link to="#" onClick={() => modalQuestAdd(true)}>
-            <i className="uil uil-plus"></i>
-          </Link>
-        </div>
-        {/* 등록버튼 끝 */}
-
-        {/* 모달 - 퀘스트 등록 */}
-        <Modal open={openQuestAdd} onClose={() => modalQuestAdd(false)} center>
-          <div className="modal-quest-add">
-            <form name="addForm" method="post" action="">
-              <fieldset>
-                <legend>등록</legend>
-                <div className="mqa-area">
-                  <dl className="mqa-header">
-                    <dt>Create New Prediction</dt>
-                    <dd onClick={() => modalQuestAdd(false)}>
-                      <i className="uil uil-times"></i>
-                    </dd>
-                  </dl>
-                  <ul className="mqa-content2">
-                    <li key='1'>
-                      <select className="w100p" name="languageSelect" onChange={(e) => setModalValues({...modalValues, 'questLanguage': e.target.value})}>
-                        <option value="EN">&nbsp;🇺🇸&nbsp;&nbsp;English</option>
-                        <option value="KR">&nbsp;🇰🇷&nbsp;&nbsp;Korean</option>
-                        <option value="CH">&nbsp;🇨🇳&nbsp;&nbsp;Chinese</option>
-                      </select>
-                    </li>
-                    <li key='2'>
-                      <textarea
-                        name="title"
-                        type="text"
-                        className="w100p"
-                        placeholder="Please enter a title(English)"
-                        onChange={(e) => setModalValues({...modalValues, 'title': e.target.value})}
-                      ></textarea>
-                    </li>
-                    <li key='3'>
-                      <select name="name" title="" className="w100p" defaultValue="" onChange={(e) => setModalValues({...modalValues, 'seasonCategory': { _type: 'reference', _ref: e.target.value }})}>
-                        <option value="">
-                          Please select a category
-                        </option>
-                        {
-                          categories?.filter((category) => category.seasonCategoryName !== 'All').map((category, index) => (
-                            <option key={index} value={category._id}>{category.seasonCategoryName}</option>
-                          ))
-                        }
-                      </select>
-                    </li>
-                    <li key='4'>
-                      <DatePicker
-                        dateFormat="yyyy-MM-dd HH:mm:ss"
-                        selected={endDateTime}
-                        onChange={(date) => setEndDateTime(date)}
-                        showTimeInput
-                      />
-                    </li>
-                    <li key='5'>
-                      <select name="questType" title="" className="w100p" onChange={(e) => setModalValues({...modalValues, 'questType': e.target.files})} >
-                        <option value="I" selected>
-                          Image
-                        </option>
-                        <option value="S">SNS url</option>
-                      </select>
-                    </li>
-                    <li key='6'>
-                      <div className="input-file">
-                        <label>
-                          File Attach
-                          <input type="file" onChange={(e) => setModalValues({...modalValues, 'imageFile': e.target.files})} />
-                        </label>
-                        &nbsp;
-                        <input
-                          type="text"
-                          readOnly="readOnly"
-                          title="File Route"
-                          id="fileRoute"
-                          placeholder="Attach an image"
-                          onChange={(e) => setModalValues({...modalValues, 'fileKey': e.target.value})}
-                        />
-                      </div>
-                    </li>
-                    <li key='7'>
-                      <input
-                        name="name"
-                        type="text"
-                        className="w100p"
-                        placeholder="Enter the image link"
-                        onChange={(e) => setModalValues({...modalValues, 'snsUrl': e.target.value})}
-                      />
-                    </li>
-                  </ul>
-                  <ol className="mqa-content1">
-                    <li key='1'>Select a Type</li>
-                    <li key='2'>
-                      <Link to="#">
-                        <i className="uil uil-plus-circle" onClick={() => { if(document.querySelectorAll('.mqa-answers li').length > 5) {return;} document.querySelector('.mqa-answers').insertAdjacentHTML('beforeend', `<li> <input name="name" type="text" className="w100p" placeholder="" /> </li>`)}}></i>
-                      </Link>
-                      <Link to="#">
-                        <i className="uil uil-minus-circle"onClick={() => { if(document.querySelectorAll('.mqa-answers li').length < 2) {return;} document.querySelector('.mqa-answers').removeChild(document.querySelector('.mqa-answers').lastChild)}}></i>
-                      </Link>
-                    </li>
-                  </ol>
-                  <ul className="mqa-content2 mqa-answers">
-                    <li key='1'> 
-                      <input
-                        name="name"
-                        type="text"
-                        className="w100p"
-                        placeholder=""
-                      />
-                    </li>
-                    <li key='2'>
-                      <input
-                        name="name"
-                        type="text"
-                        className="w100p"
-                        placeholder=""
-                      />
-                    </li>
-                  </ul>
-                  <p className="mqa-btn">
-                    <Link to="#" onClick={() => createNewQuest(modalValues, document.querySelectorAll('.mqa-answers li input'))}>Complete</Link>
-                  </p>
-                </div>
-              </fieldset>
-            </form>
-          </div>
-        </Modal>
-        {/* 모달 - 퀘스트 등록 끝 */}
-
-        {/* 모달 - 퀘스트 시즌 */}
-        <Modal
-          open={openQuestSeason}
-          onClose={() => modalQuestSeason(false)}
-          center
-        >
-          <div className="modal-quest-season">
-            <div className="mqs-area">
-              <dl className="mqs-header">
-                <dt>Create Season of COJAM Service!</dt>
-                <dd onClick={() => modalQuestSeason(false)}>
-                  <i className="uil uil-times"></i>
-                </dd>
-              </dl>
-              {
-                seasonInfos?.map((seasonInfo) => (
-                  <>
-                    <div className="mqs-date">
-                    <i className="uil uil-calendar-alt"></i> {Moment(seasonInfo.startDate).format('YYYY-MM-DD HH:mm:ss')} ~ {Moment(seasonInfo.endDate).format('YYYY-MM-DD HH:mm:ss')}
-                    ({ Moment(seasonInfo.endDate).diff(Moment(seasonInfo.startDate), 'days')})
-                    </div>
-
-                    <ul className="mqs-content">
-                      {
-                        categories?.map((category, index) => (
-                          <li key={index}>
-                            <h3>{category.seasonCategoryName}</h3>
-                            <div>
-                              <div style={{ width: `${seasonInfo.caregoryAggr && seasonInfo.caregoryAggr[category.seasonCategoryName] || 0}%` }}></div>
-                              <p>{seasonInfo.caregoryAggr && seasonInfo.caregoryAggr[category.seasonCategoryName] || 0} / 100</p>
-                            </div>
-                          </li>
-                        ))
-                      }
-                    </ul>
-
-                    <div className="mqs-info">
-                      <h2>Title : Create Season of COJAM Service!</h2>
-                      <h2>Description : Create Season of COJAM Service!</h2>
-                      <div>
-                        COJAM Fee : <span>{seasonInfo.cojamFee}%</span>
-                        <br />
-                        Charity Fee : <span>{seasonInfo.charityFee}%</span>
-                        <br />
-                        Creator Fee : <span>{seasonInfo.creatorFee}%</span>
-                        <br />
-                        Creator Pay : <span>{addComma(seasonInfo.creatorPay)} CT</span>
-                        <br />
-                        Minimum Pay : <span>{addComma(seasonInfo.minimumPay)} CT</span>
-                        <br />
-                        Maximum Pay : <span>{addComma(seasonInfo.maximumPay)} CT</span>
-                      </div>
-                    </div>
-                  </>                  
-                ))  
-              }
-            </div>
-          </div>
-        </Modal>
-        {/* 모달 - 퀘스트 시즌 끝 */}
-
+    <>
+      <div className="quest">
+      	<div className="top-randomQuest">
+			    <div className="random-left">
+          		<figure></figure>
+          		<div className=""></div>
+        	</div>
+			    <div className="random-right">
+          	<span>22.01.12 WED Winner Prediction : [EFL CUP] Semi-Final, Chelsea FC vs Tottenham Hotspur FC</span>
+          	<div><h3 style={{fontWeight: 700}}>D-day 2 : 2022 02 18</h3></div>
+          	<div className="randomQuest-results">
+        			<div className="random-results-inner">
+              	<div className="random-resultsTop">
+                	<ul>
+                  	<li>
+                    	<div className="random-itemLeft"></div>
+                    	<div className="random-itemRight"></div>
+                  	</li>
+                    <li>
+                    	<div className="random-itemLeft"></div>
+                    	<div className="random-itemRight"></div>
+                  	</li>
+                    <li>
+                    	<div className="random-itemLeft"></div>
+                    	<div className="random-itemRight"></div>
+                  	</li>
+                	</ul>
+              	</div>
+              	<div className="random-resultsBot">
+                	<button className="resultsTop-btn"><span>Choice Results</span></button>
+                	<div className="init-battingnum"></div>
+              	</div>
+        			</div>
+        		</div>
+        	</div>
+		    </div>
       </div>
-    </div>
+
+      <Sticky />
+      </>
   )
 }
+
+function Sticky(){
+  return (
+    <div className="stickyWrap">
+      <div className="sticky-inner">
+        <div className="sticky-tabModal">
+          <StickyLeft />
+          <StickyRight />
+        </div>
+        <div className="all-questArea">
+          <MakeQuest />
+          <AllQuestList />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+///// 퀘스트 필터 모달
+function MakeQuest(){
+  return (
+    <div className="make-wrraper">
+      <div className="overlay"></div>
+      <div className="make-modal">
+        <div className="make-inner"></div>
+      </div>
+    </div>
+  );
+}
+///// 메이크 퀘스트 모달
+
+function StickyLeft(){
+  return(
+    <>
+      <div onClick={stickyLeft} className="sticky stickyLeft">
+        <p className="clickStickyText1">Make quest?</p>
+      </div>
+    </>
+  );
+}
+function StickyRight(){
+  return(
+    <>
+      <div onClick={stickyRight} className="sticky stickyRight">
+        <p className="clickStickyText2">Open fillter</p>
+      </div>
+    </>
+  );
+}
+//////// 필터, 퀘스트 만들기 클릭 효과
+function stickyLeft(){
+  document.getElementsByClassName('sticky')[0].addEventListener('click', function(){
+    $(".clickStickyText1").addClass("active");
+  });
+}
+function stickyRight(){
+  document.getElementsByClassName('sticky')[1].addEventListener('click', function(){
+    $(".clickStickyText2").addClass("active");
+  });
+}
+
+
+
+///// 퀘스트 리스트
+function AllQuestList(){
+  return(
+    <>
+      <nav className="all-listContainer">
+        <ul>
+          <li>
+            <div className="all-items">
+              <figure></figure>
+              <div className="allQuest-tit">
+                <h3>All Quest Title</h3>
+
+              </div>
+            </div>
+          </li>
+          <li>
+            <div className="all-items">
+              <figure></figure>
+              <div className="allQuest-tit">
+                <h3>All Quest Title</h3>
+
+              </div>
+            </div>
+          </li>
+          <li>
+            <div className="all-items">
+              <figure></figure>
+              <div className="allQuest-tit">
+                <h3>All Quest Title</h3>
+
+              </div>
+            </div>
+          </li>
+          <li>
+            <div className="all-items">
+              <figure></figure>
+              <div className="allQuest-tit">
+                <h3>All Quest Title</h3>
+
+              </div>
+            </div>
+          </li>
+          <li>
+            <div className="all-items">
+              <figure></figure>
+              <div className="allQuest-tit">
+                <h3>All Quest Title</h3>
+
+              </div>
+            </div>
+          </li>
+          <li>
+            <div className="all-items">
+              <figure></figure>
+              <div className="allQuest-tit">
+                <h3>All Quest Title</h3>
+
+              </div>
+            </div>
+          </li>
+          <li>
+            <div className="all-items">
+              <figure></figure>
+              <div className="allQuest-tit">
+                <h3>All Quest Title</h3>
+
+              </div>
+            </div>
+          </li>
+          <li>
+            <div className="all-items">
+              <figure></figure>
+              <div className="allQuest-tit">
+                <h3>All Quest Title</h3>
+
+              </div>
+            </div>
+          </li>
+          <li>
+            <div className="all-items">
+              <figure></figure>
+              <div className="allQuest-tit">
+                <h3>All Quest Title</h3>
+
+              </div>
+            </div>
+          </li>
+          <li>
+            <div className="all-items">
+              <figure></figure>
+              <div className="allQuest-tit">
+                <h3>All Quest Title</h3>
+
+              </div>
+            </div>
+          </li>
+          <li>
+            <div className="all-items">
+              <figure></figure>
+              <div className="allQuest-tit">
+                <h3>All Quest Title</h3>
+
+              </div>
+            </div>
+          </li>
+          <li>
+            <div className="all-items">
+              <figure></figure>
+              <div className="allQuest-tit">
+                <h3>All Quest Title</h3>
+
+              </div>
+            </div>
+          </li>
+          <li>
+            <div className="all-items">
+              <figure></figure>
+              <div className="allQuest-tit">
+                <h3>All Quest Title</h3>
+
+              </div>
+            </div>
+          </li>
+          <li>
+            <div className="all-items">
+              <figure></figure>
+              <div className="allQuest-tit">
+                <h3>All Quest Title</h3>
+
+              </div>
+            </div>
+          </li>
+          <li>
+            <div className="all-items">
+              <figure></figure>
+              <div className="allQuest-tit">
+                <h3>All Quest Title</h3>
+
+              </div>
+            </div>
+          </li>
+        </ul>
+      </nav>
+    </>
+  );
+}
+
+
+
+
+
+
+
+
 
 function addComma(data) {
   if(!data) return '';
 
 	return data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
+
 
 export default Index;
